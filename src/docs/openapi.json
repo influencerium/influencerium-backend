@@ -1,0 +1,2778 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Influencerium API",
+        "description": "REST API for Influencerium - Influencer Data Management Platform. Manage influencers, campaigns, data models, and analytics with secure authentication and role-based access control.",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Influencerium Support",
+            "email": "support@influencerium.com",
+            "url": "https://influencerium.com/help"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000/api/v1",
+            "description": "Development server"
+        },
+        {
+            "url": "https://api.influencerium.com/api/v1",
+            "description": "Production server"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "User authentication and session management"
+        },
+        {
+            "name": "Users",
+            "description": "User management and profile operations"
+        },
+        {
+            "name": "Influencers",
+            "description": "Influencer data management"
+        },
+        {
+            "name": "Campaigns",
+            "description": "Campaign management and tracking"
+        },
+        {
+            "name": "Data Models",
+            "description": "Data model operations"
+        },
+        {
+            "name": "Analytics",
+            "description": "Analytics and reporting"
+        }
+    ],
+    "paths": {
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "description": "Creates a new user account and returns authentication tokens",
+                "operationId": "registerUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email already registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "User login",
+                "description": "Authenticates a user and returns JWT tokens",
+                "operationId": "loginUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "description": "Logs out the current user (client should discard tokens)",
+                "operationId": "logoutUser",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get current user",
+                "description": "Returns the currently authenticated user's profile",
+                "operationId": "getCurrentUser",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current user profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserProfile"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Not authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sessions": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "List user sessions",
+                "description": "Returns all active sessions for the current user",
+                "operationId": "listSessions",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "expired",
+                                "revoked",
+                                "all"
+                            ],
+                            "default": "all"
+                        },
+                        "description": "Filter by session status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "description": "Page number for pagination"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 100
+                        },
+                        "description": "Number of items per page"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of user sessions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Revoke all other sessions",
+                "description": "Revokes all sessions except the current one",
+                "operationId": "revokeOtherSessions",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sessions revoked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sessions/all": {
+            "delete": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout from all devices",
+                "description": "Revokes all sessions including the current one (logout everywhere)",
+                "operationId": "logoutAllDevices",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All sessions revoked",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Request password reset",
+                "description": "Sends a password reset email to the user (if account exists)",
+                "operationId": "requestPasswordReset",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ForgotPasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset email sent (if account exists)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset password",
+                "description": "Resets the user's password using a valid reset token",
+                "operationId": "resetPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetPasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/profile": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user profile",
+                "description": "Returns the authenticated user's profile",
+                "operationId": "getUserProfile",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserProfile"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user profile",
+                "description": "Updates the authenticated user's profile (name and/or email)",
+                "operationId": "updateUserProfile",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProfileRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserProfile"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email already in use",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/password": {
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update password",
+                "description": "Updates the authenticated user's password",
+                "operationId": "updatePassword",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Current password is incorrect",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/influencers": {
+            "get": {
+                "tags": [
+                    "Influencers"
+                ],
+                "summary": "List influencers",
+                "description": "Returns a paginated list of influencers with optional filtering",
+                "operationId": "listInfluencers",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by name, username, or email"
+                    },
+                    {
+                        "in": "query",
+                        "name": "platform",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "instagram",
+                                "tiktok",
+                                "youtube",
+                                "twitter",
+                                "facebook",
+                                "linkedin",
+                                "other"
+                            ]
+                        },
+                        "description": "Filter by platform"
+                    },
+                    {
+                        "in": "query",
+                        "name": "category",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by category"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "inactive",
+                                "pending",
+                                "blocked"
+                            ],
+                            "default": "active"
+                        },
+                        "description": "Filter by status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "minFollowers",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Minimum follower count"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortBy",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "name",
+                                "followers",
+                                "engagement_rate",
+                                "created_at"
+                            ],
+                            "default": "created_at"
+                        },
+                        "description": "Field to sort by"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortOrder",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "default": "desc"
+                        },
+                        "description": "Sort order"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 100
+                        },
+                        "description": "Items per page"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of influencers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InfluencerListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Influencers"
+                ],
+                "summary": "Create influencer",
+                "description": "Creates a new influencer profile",
+                "operationId": "createInfluencer",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateInfluencerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Influencer created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Influencer"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Influencer already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/influencers/{id}": {
+            "get": {
+                "tags": [
+                    "Influencers"
+                ],
+                "summary": "Get influencer",
+                "description": "Returns a single influencer by ID",
+                "operationId": "getInfluencer",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Influencer ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Influencer details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Influencer"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Influencer not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Influencers"
+                ],
+                "summary": "Update influencer",
+                "description": "Updates an existing influencer profile",
+                "operationId": "updateInfluencer",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Influencer ID"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateInfluencerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Influencer updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Influencer"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Influencer not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Influencers"
+                ],
+                "summary": "Delete influencer",
+                "description": "Deletes an influencer profile",
+                "operationId": "deleteInfluencer",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Influencer ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Influencer deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Influencer not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/campaigns": {
+            "get": {
+                "tags": [
+                    "Campaigns"
+                ],
+                "summary": "List campaigns",
+                "description": "Returns a paginated list of campaigns",
+                "operationId": "listCampaigns",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by name or description"
+                    },
+                    {
+                        "in": "query",
+                        "name": "platform",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by platform"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "active",
+                                "paused",
+                                "completed",
+                                "cancelled"
+                            ]
+                        },
+                        "description": "Filter by status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 100
+                        },
+                        "description": "Items per page"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of campaigns",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CampaignListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Campaigns"
+                ],
+                "summary": "Create campaign",
+                "description": "Creates a new campaign",
+                "operationId": "createCampaign",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCampaignRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Campaign created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Campaign"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/campaigns/{id}": {
+            "get": {
+                "tags": [
+                    "Campaigns"
+                ],
+                "summary": "Get campaign",
+                "description": "Returns a single campaign with its influencers",
+                "operationId": "getCampaign",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Campaign ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Campaign details with influencers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Campaign"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Campaign not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Campaigns"
+                ],
+                "summary": "Update campaign",
+                "description": "Updates an existing campaign",
+                "operationId": "updateCampaign",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Campaign ID"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCampaignRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Campaign updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Campaign"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Campaign not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Campaigns"
+                ],
+                "summary": "Delete campaign",
+                "description": "Deletes a campaign and its influencer associations",
+                "operationId": "deleteCampaign",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Campaign ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Campaign deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Campaign not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/models": {
+            "get": {
+                "tags": [
+                    "Data Models"
+                ],
+                "summary": "List data models",
+                "description": "Returns a paginated list of data models",
+                "operationId": "listDataModels",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by name or description"
+                    },
+                    {
+                        "in": "query",
+                        "name": "source",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by source"
+                    },
+                    {
+                        "in": "query",
+                        "name": "is_active",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Filter by active status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 100
+                        },
+                        "description": "Items per page"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of data models",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DataModelListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Data Models"
+                ],
+                "summary": "Create data model",
+                "description": "Creates a new data model schema",
+                "operationId": "createDataModel",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateDataModelRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data model created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DataModel"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Model with this name already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/models/{id}": {
+            "get": {
+                "tags": [
+                    "Data Models"
+                ],
+                "summary": "Get data model",
+                "description": "Returns a single data model by ID",
+                "operationId": "getDataModel",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Data Model ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data model details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DataModel"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data model not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Data Models"
+                ],
+                "summary": "Update data model",
+                "description": "Updates an existing data model",
+                "operationId": "updateDataModel",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Data Model ID"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateDataModelRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Data model updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DataModel"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data model not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Data Models"
+                ],
+                "summary": "Delete data model",
+                "description": "Deletes a data model and all its data points",
+                "operationId": "deleteDataModel",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Data Model ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data model deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Success"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data model not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/models/{id}/data": {
+            "get": {
+                "tags": [
+                    "Data Models"
+                ],
+                "summary": "List model data",
+                "description": "Returns data points for a specific model",
+                "operationId": "listModelData",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Data Model ID"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "default": 50,
+                            "maximum": 200
+                        },
+                        "description": "Items per page"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of data points",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ModelDataListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Data Models"
+                ],
+                "summary": "Add data point",
+                "description": "Adds a new data point to the model",
+                "operationId": "addDataPoint",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Data Model ID"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddDataPointRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data point added successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DataPoint"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data model not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/overview": {
+            "get": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get analytics overview",
+                "description": "Returns platform-wide analytics overview",
+                "operationId": "getAnalyticsOverview",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Analytics overview data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnalyticsOverview"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/influencers": {
+            "get": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get influencer analytics",
+                "description": "Returns influencer analytics including top performers and trends",
+                "operationId": "getInfluencerAnalytics",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Influencer analytics data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InfluencerAnalytics"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/campaigns": {
+            "get": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get campaign analytics",
+                "description": "Returns campaign analytics and performance data",
+                "operationId": "getCampaignAnalytics",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Campaign analytics data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CampaignAnalytics"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "JWT authorization header. Example: `Authorization: Bearer <token>`"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "example": "An error occurred"
+                            },
+                            "code": {
+                                "type": "string",
+                                "example": "ERROR_CODE"
+                            }
+                        }
+                    }
+                }
+            },
+            "Success": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Operation successful"
+                    }
+                }
+            },
+            "RegisterRequest": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "email",
+                    "password",
+                    "confirmPassword"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 100,
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 128,
+                        "example": "SecurePass123!"
+                    },
+                    "confirmPassword": {
+                        "type": "string",
+                        "example": "SecurePass123!"
+                    }
+                }
+            },
+            "LoginRequest": {
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "SecurePass123!"
+                    }
+                }
+            },
+            "AuthResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Login successful"
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "user": {
+                                "$ref": "#/components/schemas/UserProfile"
+                            },
+                            "token": {
+                                "type": "string",
+                                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                            },
+                            "refreshToken": {
+                                "type": "string",
+                                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                            }
+                        }
+                    }
+                }
+            },
+            "UserProfile": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "user",
+                            "moderator",
+                            "admin",
+                            "super_admin"
+                        ],
+                        "example": "user"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "suspended"
+                        ],
+                        "example": "active"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-27T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-27T10:00:00Z"
+                    }
+                }
+            },
+            "UpdateProfileRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 100,
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    }
+                }
+            },
+            "UpdatePasswordRequest": {
+                "type": "object",
+                "required": [
+                    "currentPassword",
+                    "newPassword",
+                    "confirmNewPassword"
+                ],
+                "properties": {
+                    "currentPassword": {
+                        "type": "string",
+                        "example": "OldSecurePass123!"
+                    },
+                    "newPassword": {
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 128,
+                        "example": "NewSecurePass456!"
+                    },
+                    "confirmNewPassword": {
+                        "type": "string",
+                        "example": "NewSecurePass456!"
+                    }
+                }
+            },
+            "ForgotPasswordRequest": {
+                "type": "object",
+                "required": [
+                    "email"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    }
+                }
+            },
+            "ResetPasswordRequest": {
+                "type": "object",
+                "required": [
+                    "token",
+                    "password",
+                    "confirmPassword"
+                ],
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "example": "abc123def456..."
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 128,
+                        "example": "NewSecurePass456!"
+                    },
+                    "confirmPassword": {
+                        "type": "string",
+                        "example": "NewSecurePass456!"
+                    }
+                }
+            },
+            "SessionListResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "sessions": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        }
+                    }
+                }
+            },
+            "Session": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "ip_address": {
+                        "type": "string",
+                        "example": "192.168.1.1"
+                    },
+                    "user_agent": {
+                        "type": "string",
+                        "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+                    },
+                    "device_info": {
+                        "type": "string",
+                        "example": "Chrome on Windows"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "expired",
+                            "revoked"
+                        ],
+                        "example": "active"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "last_active_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "Influencer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Alex Johnson"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "alex@example.com"
+                    },
+                    "username": {
+                        "type": "string",
+                        "example": "alexjohnson"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "linkedin",
+                            "other"
+                        ],
+                        "example": "instagram"
+                    },
+                    "profile_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://instagram.com/alexjohnson"
+                    },
+                    "followers": {
+                        "type": "integer",
+                        "example": 150000
+                    },
+                    "engagement_rate": {
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 4.5
+                    },
+                    "location": {
+                        "type": "string",
+                        "example": "Los Angeles, CA"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "example": "Tech reviewer and lifestyle creator"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "Technology"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "tech",
+                            "lifestyle",
+                            "reviews"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "pending",
+                            "blocked"
+                        ],
+                        "example": "active"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "CreateInfluencerRequest": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "platform"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 100,
+                        "example": "Alex Johnson"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "username": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 50
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "linkedin",
+                            "other"
+                        ]
+                    },
+                    "profile_url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "followers": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "engagement_rate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    "location": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "bio": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "category": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 30
+                        }
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 1000
+                    }
+                }
+            },
+            "UpdateInfluencerRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "username": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 50
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "linkedin",
+                            "other"
+                        ]
+                    },
+                    "profile_url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "followers": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "engagement_rate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    "location": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "bio": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "category": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 30
+                        }
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 1000
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "pending",
+                            "blocked"
+                        ]
+                    }
+                }
+            },
+            "InfluencerListResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "influencers": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Influencer"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        }
+                    }
+                }
+            },
+            "Campaign": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Summer Tech Launch"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Promotion campaign for new smartphone launch"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "linkedin",
+                            "multi"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "paused",
+                            "completed",
+                            "cancelled"
+                        ]
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "budget": {
+                        "type": "number",
+                        "format": "decimal"
+                    },
+                    "goals": {
+                        "type": "string"
+                    },
+                    "target_audience": {
+                        "type": "string"
+                    },
+                    "influencers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Influencer"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "CreateCampaignRequest": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "platform"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "linkedin",
+                            "multi"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "paused",
+                            "completed",
+                            "cancelled"
+                        ],
+                        "default": "draft"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "budget": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "goals": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "target_audience": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 1000
+                    }
+                }
+            },
+            "UpdateCampaignRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "linkedin",
+                            "multi"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "paused",
+                            "completed",
+                            "cancelled"
+                        ]
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "budget": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "goals": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "target_audience": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 1000
+                    }
+                }
+            },
+            "CampaignListResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "campaigns": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Campaign"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        }
+                    }
+                }
+            },
+            "DataModel": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Instagram Influencer Profile"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "string",
+                        "enum": [
+                            "postedapp",
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "custom"
+                        ]
+                    },
+                    "schema": {
+                        "type": "object",
+                        "description": "Model schema definition"
+                    },
+                    "settings": {
+                        "type": "object"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "data_count": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "CreateDataModelRequest": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "source",
+                    "schema"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "source": {
+                        "type": "string",
+                        "enum": [
+                            "postedapp",
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "custom"
+                        ]
+                    },
+                    "schema": {
+                        "type": "object",
+                        "description": "Model schema definition"
+                    },
+                    "settings": {
+                        "type": "object"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            },
+            "UpdateDataModelRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "source": {
+                        "type": "string",
+                        "enum": [
+                            "postedapp",
+                            "instagram",
+                            "tiktok",
+                            "youtube",
+                            "twitter",
+                            "facebook",
+                            "custom"
+                        ]
+                    },
+                    "schema": {
+                        "type": "object"
+                    },
+                    "settings": {
+                        "type": "object"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "DataModelListResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "models": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DataModel"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        }
+                    }
+                }
+            },
+            "ModelDataListResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "model_name": {
+                                "type": "string"
+                            },
+                            "data_points": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DataPoint"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        }
+                    }
+                }
+            },
+            "DataPoint": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "model_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "data": {
+                        "type": "object"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "AddDataPointRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "description": "Data point object matching model schema"
+                    }
+                }
+            },
+            "AnalyticsOverview": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "users": {
+                                "type": "integer"
+                            },
+                            "influencers": {
+                                "type": "integer"
+                            },
+                            "campaigns": {
+                                "type": "object",
+                                "properties": {
+                                    "total": {
+                                        "type": "integer"
+                                    },
+                                    "active": {
+                                        "type": "integer"
+                                    }
+                                }
+                            },
+                            "models": {
+                                "type": "integer"
+                            },
+                            "reach": {
+                                "type": "integer"
+                            },
+                            "engagement": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "InfluencerAnalytics": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "byPlatform": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "platform": {
+                                            "type": "string"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "total_followers": {
+                                            "type": "integer"
+                                        },
+                                        "avg_followers": {
+                                            "type": "number"
+                                        },
+                                        "avg_engagement": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            },
+                            "topPerformers": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Influencer"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "CampaignAnalytics": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "byStatus": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "total_budget": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            },
+                            "platformDistribution": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "platform": {
+                                            "type": "string"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Pagination": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "example": 20
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "pages": {
+                        "type": "integer",
+                        "example": 5
+                    }
+                }
+            }
+        }
+    }
+}

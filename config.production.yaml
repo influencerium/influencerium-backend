@@ -1,0 +1,113 @@
+# Influencerium Backend Production Configuration
+# All configuration managed through this file
+
+# Application Configuration
+app:
+  name: "Influencerium API"
+  host: "0.0.0.0"
+  port: 3000
+  environment: "production"
+  api_version: "v1"
+  debug: false
+
+# Database Configuration (PostgreSQL - Use your production database)
+database:
+  host: "${DB_HOST}"
+  port: 5432
+  username: "${DB_USER}"
+  password: "${DB_PASSWORD}"
+  name: "${DB_NAME}"
+  pool:
+    min: 2
+    max: 20
+    idle_timeout: 30000
+  ssl: true
+
+# JWT Configuration - CRITICAL: Change these in production!
+jwt:
+  secret: "${JWT_SECRET}"
+  expires_in: "7d"
+  refresh_expires_in: "30d"
+
+# Password Configuration
+password:
+  salt_rounds: 12
+  reset_expires_in: 3600
+
+# Email Configuration (Configure with your email service)
+email:
+  host: "${SMTP_HOST}"
+  port: 587
+  secure: false
+  auth:
+    user: "${SMTP_USER}"
+    pass: "${SMTP_PASS}"
+  from: "Influencerium <noreply@influencerium.com>"
+  enabled: true
+
+# Rate Limiting - Stricter limits for production
+rate_limit:
+  window_ms: 900000
+  max_requests: 100
+
+# CORS Configuration - Restrict for production
+cors:
+  origin: "${FRONTEND_URL}"
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+  allowed_headers: ["Content-Type", "Authorization"]
+
+# Logging Configuration
+logging:
+  level: "info"
+  format: "json"
+  timestamp: true
+
+# File Upload Configuration
+upload:
+  max_file_size: 10485760
+  allowed_types:
+    - "image/jpeg"
+    - "image/png"
+    - "image/gif"
+    - "application/pdf"
+  directory: "./uploads"
+
+# Pagination Defaults
+pagination:
+  default_limit: 20
+  max_limit: 100
+
+# Session Configuration
+session:
+  secret: "${SESSION_SECRET}"
+  cookie_max_age: 604800000
+
+# Redis Configuration (Optional - for caching)
+redis:
+  host: "${REDIS_HOST}"
+  port: 6379
+  password: "${REDIS_PASSWORD}"
+  db: 0
+  enabled: false
+
+# API Documentation
+documentation:
+  enabled: true
+  title: "Influencerium API Documentation"
+  description: "REST API for Influencerium Platform"
+  version: "1.0.0"
+  endpoint: "/docs"
+
+# Features Toggle
+features:
+  social_login: false
+  email_verification: true
+  two_factor_auth: false
+  rate_limiting: true
+  caching: true
+
+# Development Settings (all false for production)
+development:
+  seed_data: false
+  debug_queries: false
+  log_requests: false

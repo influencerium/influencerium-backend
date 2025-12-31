@@ -1,0 +1,1019 @@
+{
+    "info": {
+        "name": "Influencerium API",
+        "description": "REST API for Influencerium - Influencer Data Management Platform. Manage influencers, campaigns, data models, and analytics with secure authentication.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "1.0.0"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000/api/v1",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refreshToken",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "userId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "influencerId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "campaignId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "modelId",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('token', jsonData.data.token);",
+                                    "    pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                                    "    pm.collectionVariables.set('userId', jsonData.data.user.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "John Doe",
+                                "email": "john{{$timestamp}}@example.com",
+                                "password": "SecurePass123!",
+                                "confirmPassword": "SecurePass123!"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user account"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('token', jsonData.data.token);",
+                                    "    pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+                                    "    pm.collectionVariables.set('userId', jsonData.data.user.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "email": "john@example.com",
+                                "password": "SecurePass123!"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Authenticate user and get JWT tokens"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get currently authenticated user profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout current user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Sessions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/sessions?status=all&page=1&limit=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "sessions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "all",
+                                    "description": "Filter by status (active, expired, revoked, all)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get all user sessions"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout All Devices",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/sessions/all",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "sessions",
+                                "all"
+                            ]
+                        },
+                        "description": "Logout from all devices (revoke all sessions)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "email": "john@example.com"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/forgot-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "forgot-password"
+                            ]
+                        },
+                        "description": "Request password reset email"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "token": "your-reset-token",
+                                "password": "NewSecurePass456!",
+                                "confirmPassword": "NewSecurePass456!"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/reset-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "reset-password"
+                            ]
+                        },
+                        "description": "Reset password with reset token"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile"
+                            ]
+                        },
+                        "description": "Get authenticated user's profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "John Updated",
+                                "email": "johnupdated@example.com"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "profile"
+                            ]
+                        },
+                        "description": "Update user profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Password",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "currentPassword": "SecurePass123!",
+                                "newPassword": "NewSecurePass456!",
+                                "confirmNewPassword": "NewSecurePass456!"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "password"
+                            ]
+                        },
+                        "description": "Update user password"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Account",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/account",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "account"
+                            ]
+                        },
+                        "description": "Delete user account (soft delete)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Influencers",
+            "item": [
+                {
+                    "name": "List Influencers",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/influencers?page=1&limit=20&status=active",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "influencers"
+                            ],
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "description": "Search by name, username, or email"
+                                },
+                                {
+                                    "key": "platform",
+                                    "value": "",
+                                    "description": "Filter by platform"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "active"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get paginated list of influencers"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Influencer",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('influencerId', jsonData.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "Alex Johnson",
+                                "email": "alex{{$timestamp}}@example.com",
+                                "username": "alexjohnson",
+                                "platform": "instagram",
+                                "profile_url": "https://instagram.com/alexjohnson",
+                                "followers": 150000,
+                                "engagement_rate": 4.5,
+                                "location": "Los Angeles, CA",
+                                "bio": "Tech reviewer and lifestyle creator",
+                                "category": "Technology",
+                                "tags": [
+                                    "tech",
+                                    "lifestyle",
+                                    "reviews"
+                                ]
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/influencers",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "influencers"
+                            ]
+                        },
+                        "description": "Create new influencer profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Influencer",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/influencers/{{influencerId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "influencers",
+                                "{{influencerId}}"
+                            ]
+                        },
+                        "description": "Get influencer by ID"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Influencer",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "followers": 155000,
+                                "engagement_rate": 4.8
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/influencers/{{influencerId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "influencers",
+                                "{{influencerId}}"
+                            ]
+                        },
+                        "description": "Update influencer profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Influencer",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/influencers/{{influencerId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "influencers",
+                                "{{influencerId}}"
+                            ]
+                        },
+                        "description": "Delete influencer"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Campaigns",
+            "item": [
+                {
+                    "name": "List Campaigns",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/campaigns?page=1&limit=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "campaigns"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": ""
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get paginated list of campaigns"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Campaign",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('campaignId', jsonData.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "Summer Tech Launch",
+                                "description": "Promotion campaign for new smartphone launch",
+                                "platform": "instagram",
+                                "status": "draft",
+                                "start_date": "2025-06-01",
+                                "end_date": "2025-08-31",
+                                "budget": 50000,
+                                "goals": "Increase brand awareness by 25%",
+                                "target_audience": "Tech enthusiasts 18-35"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/campaigns",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "campaigns"
+                            ]
+                        },
+                        "description": "Create new campaign"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Campaign",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "campaigns",
+                                "{{campaignId}}"
+                            ]
+                        },
+                        "description": "Get campaign by ID with influencers"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Campaign",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "status": "active"
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "campaigns",
+                                "{{campaignId}}"
+                            ]
+                        },
+                        "description": "Update campaign"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Campaign",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "campaigns",
+                                "{{campaignId}}"
+                            ]
+                        },
+                        "description": "Delete campaign"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Data Models",
+            "item": [
+                {
+                    "name": "List Models",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/models?page=1&limit=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "models"
+                            ],
+                            "query": [
+                                {
+                                    "key": "is_active",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get paginated list of data models"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Model",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('modelId', jsonData.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "Instagram Influencer Profile",
+                                "description": "Data model for Instagram influencer profiles",
+                                "source": "instagram",
+                                "schema": {
+                                    "fields": [
+                                        {
+                                            "name": "username",
+                                            "type": "string",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "followers",
+                                            "type": "number",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "posts",
+                                            "type": "number",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "engagement_rate",
+                                            "type": "number",
+                                            "required": true
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/models",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "models"
+                            ]
+                        },
+                        "description": "Create new data model"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Model",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/models/{{modelId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "models",
+                                "{{modelId}}"
+                            ]
+                        },
+                        "description": "Get data model by ID"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Model Data",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/models/{{modelId}}/data?page=1&limit=50",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "models",
+                                "{{modelId}}",
+                                "data"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "50"
+                                }
+                            ]
+                        },
+                        "description": "Get data points for a model"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Data Point",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "data": {
+                                    "username": "test_user",
+                                    "followers": 10000,
+                                    "posts": 150,
+                                    "engagement_rate": 5.5
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/models/{{modelId}}/data",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "models",
+                                "{{modelId}}",
+                                "data"
+                            ]
+                        },
+                        "description": "Add data point to model"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Model",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/models/{{modelId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "models",
+                                "{{modelId}}"
+                            ]
+                        },
+                        "description": "Delete data model and all its data"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Analytics",
+            "item": [
+                {
+                    "name": "Get Overview",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/analytics/overview",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "analytics",
+                                "overview"
+                            ]
+                        },
+                        "description": "Get platform analytics overview"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Influencer Analytics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/analytics/influencers",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "analytics",
+                                "influencers"
+                            ]
+                        },
+                        "description": "Get influencer analytics"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Campaign Analytics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/analytics/campaigns",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "analytics",
+                                "campaigns"
+                            ]
+                        },
+                        "description": "Get campaign analytics"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

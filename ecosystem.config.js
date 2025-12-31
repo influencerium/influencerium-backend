@@ -1,0 +1,43 @@
+{
+    "name": "influencerium-backend",
+    "script": "src/index.js",
+    "instances": "max",
+    "exec_mode": "cluster",
+    "watch": false,
+    "autorestart": true,
+    "max_memory_restart": "500M",
+    "exp_backoff_restart_delay": 100,
+    "max_restarts": 10,
+    "min_uptime": "10s",
+    "env": {
+        "NODE_ENV": "production",
+        "PORT": 3000
+    },
+    "env_production": {
+        "NODE_ENV": "production",
+        "PORT": 3000,
+        "DB_HOST": "localhost",
+        "DB_PORT": 5432,
+        "DB_USER": "influencerium",
+        "DB_NAME": "influencerium",
+        "DB_SSL": true,
+        "JWT_SECRET": "${JWT_SECRET}",
+        "SESSION_SECRET": "${SESSION_SECRET}",
+        "FRONTEND_URL": "https://influencerium.com",
+        "REDIS_ENABLED": false,
+        "LOG_LEVEL": "info"
+    },
+    "log_file": "/var/log/influencerium/app.log",
+    "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+    "error_file": "/var/log/influencerium/error.log",
+    "out_file": "/var/log/influencerium/out.log",
+    "pid_file": "/var/run/influencerium/app.pid",
+    "kill_timeout": 5000,
+    "listen_timeout": 3000,
+    "shutdown_with_message": true,
+    "watch_delay": 1000,
+    "source_map_support": true,
+    "crash_file": "/var/log/influencerium/crash.log",
+    "decorate_standard_output": true,
+    "force": true
+}
