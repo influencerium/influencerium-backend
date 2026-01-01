@@ -16,8 +16,9 @@ const passwordResetService = require('../services/passwordReset');
 // Validation Schemas
 const registerSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
-  email: Joi.string().email({ tlds: { allow: false } }).required(),
+  email: Joi.string().pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/).required(),
   password: Joi.string().min(8).max(128).required(),
+  terms: Joi.boolean().valid(true).optional()
 });
 
 const loginSchema = Joi.object({
