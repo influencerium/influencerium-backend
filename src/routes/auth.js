@@ -14,11 +14,10 @@ const Joi = require('joi');
 const passwordResetService = require('../services/passwordReset');
 
 // Validation Schemas
-const registerSchema = Joi.object({
+const registerScconst registerSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
   email: Joi.string().email({ tlds: { allow: false } }).required(),
-  password: Joi.string().min(8).max(128).required(),
-  confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+  password: Joi.string().min(8).max(128).required()
 });
 
 const loginSchema = Joi.object({
